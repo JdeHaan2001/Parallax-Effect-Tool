@@ -25,7 +25,6 @@ public class ParallaxEffect : MonoBehaviour
 
     private Vector2 screenBounds;
 
-    private CharacterController2D player;
     private Camera cam;
     private Transform camTrans;
     private Renderer objRenderer;
@@ -54,8 +53,6 @@ public class ParallaxEffect : MonoBehaviour
         if (Application.isPlaying)
         {
             camTrans = cam.transform;
-            player = FindObjectOfType<CharacterController2D>();
-            if (player == null) Debug.LogError("Couldn't find a player object", this);
 
             startPosition = transform.position.x;
 
