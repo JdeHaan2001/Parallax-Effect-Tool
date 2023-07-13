@@ -52,7 +52,7 @@ public class ParallaxTool : EditorWindow
         propLayerList = so.FindProperty("parallaxLayers");
 
         EditorApplication.playModeStateChanged += ModeChanged;
-        SetUpControls();
+        SetUpVisualElements();
         EditorSceneManager.activeSceneChangedInEditMode += ChangeLayerList;
         LoadLayers();
     }
@@ -186,24 +186,20 @@ public class ParallaxTool : EditorWindow
         }
     }
 
-    private void SetUpControls()
+    private void SetUpVisualElements()
     {
-        Debug.Log("Set up controls");
         var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>
-               ("Assets/Scripts/Editor/ParallaxEffect/parallaxEffectTool.uxml");
+               ("Assets/Scripts/Editor/parallaxEffectTool.uxml");
         VisualElement rootFromUXML = visualTree.Instantiate();
         rootVisualElement.Add(rootFromUXML);
 
         var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>
-            ("Assets/Scripts/Editor/ParallaxEffect/parallaxEffectTool.uss");
+            ("Assets/Scripts/Editor/parallaxEffectTool.uss");
         rootVisualElement.styleSheets.Add(styleSheet);
 
-        repeatLayer = rootVisualElement.Q<Toggle>("RepeatableToggle");
-        repeatRandom = rootVisualElement.Q<Toggle>("RandomToggle");
-        minHeight = rootVisualElement.Q<FloatField>("MinHeight");
-        maxHeight = rootVisualElement.Q<FloatField>("MaxHeight");
 
         SetUpButtons();
+        SetUpInputFields();
     }
 
     private void SetUpButtons()
@@ -220,6 +216,14 @@ public class ParallaxTool : EditorWindow
 
         Debug.Log("Subscribe to delete list button");
         DeleteListButton.clickable.clicked += delegate { SubscribePopupEvents(DeleteListButton); };
+    }
+
+    private void SetUpInputFields()
+    {
+        repeatLayer = rootVisualElement.Q<Toggle>("RepeatableToggle");
+        repeatRandom = rootVisualElement.Q<Toggle>("RandomToggle");
+        minHeight = rootVisualElement.Q<FloatField>("MinHeight");
+        maxHeight = rootVisualElement.Q<FloatField>("MaxHeight");
     }
 
     private void SubscribePopupEvents(Button pButton)
@@ -254,7 +258,6 @@ public class ParallaxTool : EditorWindow
         IntegerField layerField = rootVisualElement.Q<IntegerField>("LayerField");
         Slider speedField = rootVisualElement.Q<Slider>("SpeedField");
         Toggle repeatToggle = rootVisualElement.Q<Toggle>("RepeatableToggle");
-        Toggle randomToggle = rootVisualElement.Q<Toggle>("RandomToggle");
 
         string objName = nameTextField.value;
 
@@ -277,44 +280,13 @@ public class ParallaxTool : EditorWindow
 
     private void CreateObj(string pName, Sprite pSprite, int pLayer, float pSpeed, bool pRepeatable)
     {
-        if (layerParent == null)
-            layerParent = new GameObject(LAYER_PARENT_NAME);
-
-        string objName = "";
-
-        if (pName == "" || pName == string.Empty)
-        {
-            Debug.Log("Layer name is empty, will set name to 'Parallax Layer'");
-            objName = "Parallax Layer";
-        }
-        else
-            objName = pName;
-
-        Debug.Log("Creating object");
-        GameObject obj = new GameObject(objName);
-
-        obj.transform.SetParent(layerParent.transform);
-        obj.transform.tag = LAYER_TAG;
-        SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
-        obj.AddComponent<ParallaxEffect>();
-
-        ParallaxEffect parEffect = obj.GetComponent<ParallaxEffect>();
-
-        parallaxLayers.Add(parEffect);
-        parEffect.OnDestruction += LayerOnDestroy;
-        parEffect.OnTransformChange += UpdateLayerName;
-
-        renderer.sprite = pSprite;
-        renderer.sortingOrder = pLayer;
-
-        parEffect.Speed = pSpeed;
-        parEffect.isRepeating = pRepeatable;
-        parEffect.isRepeatingRandom = repeatRandom.value;
-        parEffect.MinimumHeight = minHeight.value;
-        parEffect.MaximumHeight = maxHeight.value;
+        ParallaxEffect effect = LayerGenerator.GenerateLayer(pName, pSprite, pLayer, pSpeed, pRepeatable, repeatRandom.value, minHeight.value, maxHeight.value, layerParent);
+       
+        parallaxLayers.Add(effect);
+        effect.OnDestruction += LayerOnDestroy;
+        effect.OnTransformChange += UpdateLayerName;
 
         so.Update();
-        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
     }
 
     private void UpdateLayerName(ParallaxEffect pEffect)
