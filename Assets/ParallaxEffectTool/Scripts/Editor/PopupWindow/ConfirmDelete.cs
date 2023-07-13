@@ -27,7 +27,7 @@ public class ConfirmDelete : PopupWindowContent
     {
         Debug.Log("Popup opened");
 
-        var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Scripts/Editor/ParallaxEffect/PopupWindow/PopupWindow.uxml");
+        var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/ParallaxEffectTool/Scripts/Editor/PopupWindow/PopupWindow.uxml");
         visualTree.CloneTree(editorWindow.rootVisualElement);
 
         Button confirmButton = editorWindow.rootVisualElement.Q<Button>("YesBtn");
