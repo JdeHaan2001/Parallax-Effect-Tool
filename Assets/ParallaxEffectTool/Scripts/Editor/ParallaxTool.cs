@@ -47,6 +47,8 @@ public class ParallaxTool : EditorWindow
 
     private void OnEnable()
     {
+        LayerGenerator.CreateLayerTag();
+
         Debug.Log("OnEnable");
         so = new SerializedObject(this);
         propLayerList = so.FindProperty("parallaxLayers");
@@ -189,14 +191,13 @@ public class ParallaxTool : EditorWindow
     private void SetUpVisualElements()
     {
         var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>
-               ("Assets/Scripts/Editor/parallaxEffectTool.uxml");
+               ("Assets/ParallaxEffectTool/Scripts/Editor/parallaxEffectTool.uxml");
         VisualElement rootFromUXML = visualTree.Instantiate();
         rootVisualElement.Add(rootFromUXML);
-
+        
         var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>
-            ("Assets/Scripts/Editor/parallaxEffectTool.uss");
+            ("Assets/ParallaxEffectTool/Scripts/Editor/parallaxEffectTool.uss");
         rootVisualElement.styleSheets.Add(styleSheet);
-
 
         SetUpButtons();
         SetUpInputFields();
@@ -252,7 +253,6 @@ public class ParallaxTool : EditorWindow
 
     private void AddToList()
     {
-        Debug.Log("Add to list");
         TextField nameTextField = rootVisualElement.Q<TextField>("LayerName");
         ObjectField objField = rootVisualElement.Q<ObjectField>("SpriteField");
         IntegerField layerField = rootVisualElement.Q<IntegerField>("LayerField");
