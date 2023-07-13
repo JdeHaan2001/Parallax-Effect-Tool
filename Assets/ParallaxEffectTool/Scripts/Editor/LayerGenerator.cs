@@ -11,6 +11,7 @@ public static class LayerGenerator
 
     public static ParallaxEffect GenerateLayer(string pName, Sprite pSprite, int pLayer, float pSpeed, bool pRepeatable, bool pRepeatRandom, float pMinHeight, float pMaxHeight, GameObject pLayerParent)
     {
+
         if (pLayerParent == null)
             pLayerParent = new GameObject(LAYER_PARENT_NAME);
 
@@ -24,7 +25,6 @@ public static class LayerGenerator
         else
             objName = pName;
 
-        Debug.Log("Creating object");
         GameObject obj = new GameObject(objName);
 
         obj.transform.SetParent(pLayerParent.transform);
@@ -46,5 +46,50 @@ public static class LayerGenerator
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 
         return parEffect;
+    }
+
+    public static bool CreateLayerTag()
+    {
+        SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+
+        SerializedProperty layersProp = tagManager.FindProperty("layers");
+
+        if (!PropertyExists(layersProp, 0, 31, LAYER_TAG))
+        {
+            SerializedProperty sp;
+
+            for (int i = 8, j = 31; i < j; i++)
+            {
+                sp = layersProp.GetArrayElementAtIndex(i);
+
+                if (sp.stringValue == "")
+                {
+                    sp.stringValue = LAYER_TAG;
+
+                    tagManager.ApplyModifiedProperties();
+                    return true;
+                }
+                if (i == j)
+                    Debug.Log("All allowed layers have been filled");
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if the value exists in the property.
+    /// </summary>
+    private static bool PropertyExists(SerializedProperty property, int start, int end, string value)
+    {
+        for (int i = start; i < end; i++)
+        {
+            SerializedProperty t = property.GetArrayElementAtIndex(i);
+            if (t.stringValue.Equals(value))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
