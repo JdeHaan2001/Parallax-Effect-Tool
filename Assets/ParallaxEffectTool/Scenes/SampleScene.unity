@@ -262,7 +262,7 @@ GameObject:
   - component: {fileID: 954904586}
   m_Layer: 0
   m_Name: filler text
-  m_TagString: Untagged
+  m_TagString: ParallaxLayer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

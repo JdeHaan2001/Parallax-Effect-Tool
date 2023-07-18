@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-public static class LayerGenerator
+public static class TagManager
 {
     private const string LAYER_TAG = "ParallaxLayer";
     private const string LAYER_PARENT_NAME = "Parallax Layers";
@@ -48,48 +48,59 @@ public static class LayerGenerator
         return parEffect;
     }
 
-    public static bool CreateLayerTag()
+    public static Dictionary<string, int> GetAllTags()
     {
-        SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+        SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset"));
+        SerializedProperty layers = tagManager.FindProperty("tags");
+        int layerSize = layers.arraySize;
 
-        SerializedProperty layersProp = tagManager.FindProperty("layers");
+        Dictionary<string, int> LayerDictionary = new Dictionary<string, int>();
 
-        if (!PropertyExists(layersProp, 0, 31, LAYER_TAG))
+        for (int i = 0; i < layerSize; i++)
         {
-            SerializedProperty sp;
+            SerializedProperty element = layers.GetArrayElementAtIndex(i);
+            string layerName = element.stringValue;
 
-            for (int i = 8, j = 31; i < j; i++)
-            {
-                sp = layersProp.GetArrayElementAtIndex(i);
-
-                if (sp.stringValue == "")
-                {
-                    sp.stringValue = LAYER_TAG;
-
-                    tagManager.ApplyModifiedProperties();
-                    return true;
-                }
-                if (i == j)
-                    Debug.Log("All allowed layers have been filled");
-            }
+            if (!string.IsNullOrEmpty(layerName))
+                LayerDictionary.Add(layerName, i);
         }
 
-        return false;
+        return LayerDictionary;
     }
 
-    /// <summary>
-    /// Checks if the value exists in the property.
-    /// </summary>
-    private static bool PropertyExists(SerializedProperty property, int start, int end, string value)
+    public static void CreateTag(string pName)
     {
-        for (int i = start; i < end; i++)
+        bool success = false;
+        Dictionary<string, int> dic = GetAllTags();
+        if (!dic.ContainsKey(pName))
         {
-            SerializedProperty t = property.GetArrayElementAtIndex(i);
-            if (t.stringValue.Equals(value))
+            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedProperty layers = tagManager.FindProperty("tags");
+
+            for (int i = 0; i < 31; i++)
             {
-                return true;
+                Debug.Log(i);
+                SerializedProperty element;
+
+                if (i > (layers.arraySize - 1))
+                {
+                    layers.arraySize++;
+
+                    element = layers.GetArrayElementAtIndex(i);
+                    element.stringValue = pName;
+
+                    tagManager.ApplyModifiedProperties();
+
+                    success = true;
+                    Debug.Log(i.ToString() + " Layer created: " + pName);
+                    break;
+                }
             }
+
+            if (!success)
+                Debug.Log("Could not create layer");
         }
-        return false;
+        else
+            Debug.Log("Layer Already exists: " + pName);
     }
 }
