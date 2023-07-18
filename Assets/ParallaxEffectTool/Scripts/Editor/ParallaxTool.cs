@@ -47,7 +47,8 @@ public class ParallaxTool : EditorWindow
 
     private void OnEnable()
     {
-        LayerGenerator.CreateLayerTag();
+        TagManager.CreateTag(LAYER_TAG);
+        TagManager.GetAllTags();
 
         Debug.Log("OnEnable");
         so = new SerializedObject(this);
@@ -68,6 +69,7 @@ public class ParallaxTool : EditorWindow
 
     public void CreateGUI()
     {
+
         Debug.Log("Creating GUI");
         InitGUI();
     }
@@ -280,7 +282,7 @@ public class ParallaxTool : EditorWindow
 
     private void CreateObj(string pName, Sprite pSprite, int pLayer, float pSpeed, bool pRepeatable)
     {
-        ParallaxEffect effect = LayerGenerator.GenerateLayer(pName, pSprite, pLayer, pSpeed, pRepeatable, repeatRandom.value, minHeight.value, maxHeight.value, layerParent);
+        ParallaxEffect effect = TagManager.GenerateLayer(pName, pSprite, pLayer, pSpeed, pRepeatable, repeatRandom.value, minHeight.value, maxHeight.value, layerParent);
        
         parallaxLayers.Add(effect);
         effect.OnDestruction += LayerOnDestroy;
