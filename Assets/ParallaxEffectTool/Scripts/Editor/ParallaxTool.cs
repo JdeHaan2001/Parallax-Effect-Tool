@@ -50,7 +50,6 @@ public class ParallaxTool : EditorWindow
         TagManager.CreateTag(LAYER_TAG);
         TagManager.GetAllTags();
 
-        Debug.Log("OnEnable");
         so = new SerializedObject(this);
         propLayerList = so.FindProperty("parallaxLayers");
 
@@ -62,27 +61,22 @@ public class ParallaxTool : EditorWindow
 
     private void OnDisable()
     {
-        Debug.Log("OnDisable");
         EditorApplication.playModeStateChanged -= ModeChanged;
         EditorSceneManager.activeSceneChangedInEditMode -= ChangeLayerList;
     }
 
     public void CreateGUI()
     {
-
-        Debug.Log("Creating GUI");
         InitGUI();
     }
 
     private void ChangeLayerList(Scene pCurrent, Scene pNext)
     {
-        Debug.Log("Changing scene from " + pCurrent.name + " to " + pNext.name);
         LoadLayers();
     }
 
     private void InitGUI()
     {
-        Debug.Log("InitGUI");
         topBotSplit = new TwoPaneSplitView(0, 250, TwoPaneSplitViewOrientation.Horizontal);
         leftPane = new ListView();
         rightPane = new VisualElement();
@@ -144,7 +138,6 @@ public class ParallaxTool : EditorWindow
 
     private void LoadLayers()
     {
-        Debug.Log("Loading Layers");
         if (leftPane != null)
             leftPane.onSelectionChange -= OnItemSelectionChange;
 
@@ -186,7 +179,6 @@ public class ParallaxTool : EditorWindow
         {
             UpdateListView();
             leftPane.onSelectionChange += OnItemSelectionChange;
-            Debug.Log("Updated listview after loading layers");
         }
     }
 
@@ -207,7 +199,6 @@ public class ParallaxTool : EditorWindow
 
     private void SetUpButtons()
     {
-        Debug.Log("SetUpButtons");
         Button AddButton = rootVisualElement.Q<Button>("AddButton");
         Button RemoveButton = rootVisualElement.Q<Button>("RemoveButton");
         Button DeleteListButton = rootVisualElement.Q<Button>("ListDeleteBtn");
@@ -216,8 +207,6 @@ public class ParallaxTool : EditorWindow
         AddButton.clickable.clicked += AddToList;
         RemoveButton.clickable.clicked += HandleRemoveButton;
         LoadLayersButton.clickable.clicked += LoadLayers;
-
-        Debug.Log("Subscribe to delete list button");
         DeleteListButton.clickable.clicked += delegate { SubscribePopupEvents(DeleteListButton); };
     }
 
@@ -231,7 +220,6 @@ public class ParallaxTool : EditorWindow
 
     private void SubscribePopupEvents(Button pButton)
     {
-        Debug.Log("Opening window");
         var popupWindow = new ConfirmDelete();
         popupWindow.OnConfirm += DeleteEntireList;
         popupWindow.OnCancel += CloseWindow;
@@ -249,7 +237,6 @@ public class ParallaxTool : EditorWindow
 
     private void CloseWindow(ConfirmDelete pWindow)
     {
-        Debug.Log("Closing Window");
         pWindow.editorWindow.Close();
     }
 
@@ -298,7 +285,6 @@ public class ParallaxTool : EditorWindow
 
     private void DeleteEntireList(ConfirmDelete pWindow)
     {
-        Debug.Log("Deleting List");
         if (parallaxLayers.Count <= 0) return;
 
         Debug.Log(layerParent == null);
@@ -327,14 +313,12 @@ public class ParallaxTool : EditorWindow
 
     private void HandleRemoveButton()
     {
-        Debug.Log("Handle Remove Button");
         if (currentSelection == null) return;
         RemoveFromList(currentSelection);
     }
 
     private void RemoveFromList(ParallaxEffect pParEffect)
     {
-        Debug.Log("Removing from list");
         pParEffect.OnDestruction -= LayerOnDestroy;
         parallaxLayers.Remove(pParEffect);
         parallaxLayers.TrimExcess();
@@ -360,7 +344,6 @@ public class ParallaxTool : EditorWindow
 
     private void LayerOnDestroy(ParallaxEffect pParEffect)
     {
-        Debug.Log("Removing from list");
         parallaxLayers.Remove(pParEffect);
         parallaxLayers.TrimExcess();
         so.Update();
@@ -374,22 +357,24 @@ public class ParallaxTool : EditorWindow
 
     private void UpdateListView()
     {
-        Debug.Log("Updating List view");
         ParallaxEffect[] listObjects = parallaxLayers.ToArray();
 
         if (listObjects.Length > 0)
         {
-            leftPane.makeItem = () => new Label();
-            leftPane.bindItem = (item, index) => 
+            leftPane.makeItem = () => new Image();
+            leftPane.bindItem = (item, index) =>
             {
-                if((index <= listObjects.Length - 1) && listObjects[index] != null)
-                    (item as Label).text = listObjects[index].name;
+                if ((index <= listObjects.Length - 1) && listObjects[index] != null)
+                {
+                    Image image = (item as Image);
+                    image.scaleMode = ScaleMode.ScaleToFit;
+                    image.image = listObjects[index].GetComponent<SpriteRenderer>().sprite.texture;
+                }
             };
             leftPane.itemsSource = listObjects;
         }
         else
         {
-            Debug.Log("listObjects is empty");
             if(rightPane != null)
                 rightPane.Clear();
 
@@ -400,13 +385,9 @@ public class ParallaxTool : EditorWindow
 
     private void OnItemSelectionChange(IEnumerable<object> pSelection)
     {
-        Debug.Log("Showing selection");
-        Debug.Log("Selection Layers thing: " + (pSelection.First() as ParallaxEffect));
-
         rightPane.Clear();
 
         ParallaxEffect selectedItem = pSelection.First() as ParallaxEffect;
-        Debug.Log("Selected Item = " + selectedItem);
         currentSelection = selectedItem;
         if (selectedItem == null) return;
 
@@ -415,14 +396,6 @@ public class ParallaxTool : EditorWindow
 
     private void InitVariables(ParallaxEffect pEffect)
     {
-        Sprite layerSprite = pEffect.GetComponent<SpriteRenderer>().sprite;
-        if (layerSprite == null) Debug.LogWarning($"Layer {pEffect.transform.name} doesn't contain a sprite", this);
-
-        Image spriteImage = new Image();
-        spriteImage.scaleMode = ScaleMode.ScaleToFit;
-        spriteImage.sprite = layerSprite;
-
-        Debug.Log("Initializing variables");
         TextField nameField = new TextField();
         nameField.label = "Layer Name";
         nameField.value = pEffect.transform.name;
@@ -472,12 +445,10 @@ public class ParallaxTool : EditorWindow
         rightPane.Add(minHeightField);
         rightPane.Add(maxHeightField);
         rightPane.Add(updateButton);
-        rightPane.Add(spriteImage);
     }
 
     private void UpdateVariables(ParallaxEffect pEffect, TextField pTextField, ObjectField pObjField, IntegerField pLayer, Slider pSpeed, Toggle pRepeat, Toggle pRandom, FloatField pMinHeight, FloatField pMaxHeight)
     {
-        Debug.Log("Updating variable");
         SpriteRenderer renderer = pEffect.transform.GetComponent<SpriteRenderer>();
         if (renderer == null) Debug.LogError("SpriteRenderer component not found, are you sure the Transform contains a SpriteRenderer component", this);
 
