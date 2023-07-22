@@ -111,6 +111,11 @@ public class ParallaxTool : EditorWindow
             minHeightField.SetEnabled(randomToggle.value);
             maxHeightField.SetEnabled(randomToggle.value);
         }
+
+        //if (parallaxLayers.Count > 0)
+        //{
+        //    EditorGUI.DrawPreviewTexture(new Rect(), parallaxLayers[0].GetComponent<SpriteRenderer>().sprite.texture);
+        //}
     }
 
     private void ReloadGUI()
@@ -372,6 +377,8 @@ public class ParallaxTool : EditorWindow
                 }
             };
             leftPane.itemsSource = listObjects;
+
+            UpdateSpritePreview();
         }
         else
         {
@@ -381,6 +388,24 @@ public class ParallaxTool : EditorWindow
             if(leftPane != null)
                 leftPane.itemsSource = listObjects;
         }
+    }
+
+    private Image MergeTextures()
+    {
+        return null;
+    }
+
+    private void UpdateSpritePreview()
+    {
+        Image image = new Image();
+        image.scaleMode = ScaleMode.ScaleToFit;
+        image.image = parallaxLayers[0].GetComponent<SpriteRenderer>().sprite.texture;
+        rootVisualElement.Add(image);
+    }
+
+    private void ClearSpritePreview()
+    {
+        throw new NotImplementedException("Clear Sprite Preview not implemented yet");
     }
 
     private void OnItemSelectionChange(IEnumerable<object> pSelection)
