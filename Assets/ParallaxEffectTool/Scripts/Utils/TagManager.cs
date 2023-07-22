@@ -70,7 +70,6 @@ public static class TagManager
 
     public static void CreateTag(string pName)
     {
-        bool success = false;
         Dictionary<string, int> dic = GetAllTags();
         if (!dic.ContainsKey(pName))
         {
@@ -90,17 +89,10 @@ public static class TagManager
                     element.stringValue = pName;
 
                     tagManager.ApplyModifiedProperties();
-
-                    success = true;
                     Debug.Log(i.ToString() + " Layer created: " + pName);
                     break;
                 }
             }
-
-            if (!success)
-                Debug.Log("Could not create layer");
         }
-        else
-            Debug.Log("Layer Already exists: " + pName);
     }
 }
