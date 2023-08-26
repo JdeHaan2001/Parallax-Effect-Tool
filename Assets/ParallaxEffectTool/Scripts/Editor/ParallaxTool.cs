@@ -390,16 +390,25 @@ public class ParallaxTool : EditorWindow
         }
     }
 
-    private Image MergeTextures()
-    {
-        return null;
-    }
-
     private void UpdateSpritePreview()
     {
+        Texture2D[] textures = new Texture2D[parallaxLayers.Count];
+        for (int i = 0; i < textures.Length; i++)
+        {
+            textures[i] = parallaxLayers[i].GetComponent<SpriteRenderer>().sprite.texture;
+        }
+
+
         Image image = new Image();
         image.scaleMode = ScaleMode.ScaleToFit;
-        image.image = parallaxLayers[0].GetComponent<SpriteRenderer>().sprite.texture;
+        image.image = ImageMerger.MergeTextures(textures);
+
+        //TODO: make sure image doesn't get too big and take over entire screen
+        //Below I try to scale the image to a width of 200px while maintaining the aspect ratio
+        float aspectRatio = image.image.width / image.image.height;
+        image.image.width = 200;
+        image.image.height = (int)Math.Round(image.image.width * aspectRatio, MidpointRounding.AwayFromZero);
+
         rootVisualElement.Add(image);
     }
 
@@ -488,5 +497,6 @@ public class ParallaxTool : EditorWindow
         pEffect.MinimumHeight = pMinHeight.value;
         pEffect.MaximumHeight = pMaxHeight.value;
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        UpdateListView();
     }
 }
